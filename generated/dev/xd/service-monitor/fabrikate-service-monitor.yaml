@@ -1,0 +1,46 @@
+---
+# Source: chart/templates/servicemonitors.yaml
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nginx-metrics-servicemonitor
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    team: infra
+    release: prometheus-operator
+spec:
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+      - ingress-nginx
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: flux-metrics-servicemonitor
+  namespace: monitoring
+  labels:
+    app: flux
+    team: infra
+    release: prometheus-operator
+spec:
+  endpoints:
+  - port: http
+    interval: 15s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+      - flux
+  selector:
+    matchLabels:
+      app: flux
+      release: flux

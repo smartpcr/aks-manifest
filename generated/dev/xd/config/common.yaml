@@ -1,0 +1,153 @@
+config:
+subcomponents:
+  efk-bit:
+    namespace: logging
+    injectNamespace: true
+    config:
+      efk:
+        elasticsearch:
+          image:
+            tag: "7.2.0"
+        fluentbit:
+          image:
+            tag: "1.2.1"
+        kibana:
+          image:
+            tag: "7.2.0"
+
+  fabrikate-prometheus-operator:
+    subcomponents:
+      prometheus-operator:
+        namespace: monitoring
+        injectNamespace: true
+
+        config:
+          coreDns:
+            enabled: true
+          kubeDns:
+            enabled: false
+          alertmanager:
+            alertmanagerSpec:
+              logLevel: "debug"
+              storage:
+                volumeClaimTemplate:
+                  spec:
+                    resources:
+                      requests:
+                        storage: 10Gi
+            ingress:
+              enabled: true
+              annotations:
+                kubernetes.io/ingress.class: nginx
+                kubernetes.io/tls-acme: "true"
+
+          prometheus:
+            prometheusSpec:
+              storageSpec:
+                volumeClaimTemplate:
+                  spec:
+                    resources:
+                      requests:
+                        storage: 10Gi
+            ingress:
+              enabled: true
+              annotations:
+                kubernetes.io/ingress.class: nginx
+                kubernetes.io/tls-acme: "true"
+
+          grafana:
+            adminUser: "admin"
+            adminPassword: "grafana"
+            persistence:
+              enabled: true
+              size: 10Gi
+            ingress:
+              enabled: true
+              annotations:
+                kubernetes.io/ingress.class: nginx
+                kubernetes.io/tls-acme: "true"
+
+          kubelet:
+            serviceMonitor:
+              https: false
+
+  external-dns:
+    namespace: dns
+    injectNamespace: true
+    config:
+      image:
+        name: external-dns
+        tag: 720306
+
+  nginx:
+    namespace: ingress-nginx
+    injectNamespace: true
+    config:
+      nginx:
+        controller:
+          image:
+            name: "nginx-ingress-controller"
+            tag: "732725"
+          metrics:
+            serviceMonitor:
+              enabled: true
+        defaultBackend:
+          image:
+            name: defaultbackend
+            tag: "732725"
+
+  geneva:
+    namespace: default # connection is hard-coded in svc: geneva-services.default.svc.cluster.local
+    injectNamespace: true
+    config:
+      geneva:
+        metricsAksmsi:
+          image:
+            name: linux-geneva-agent/metrics-aksmsi
+            tag: "720311"
+        metrics:
+          image:
+            name: linux-geneva-agent/metrics
+            tag: "720311"
+        metricsTelegraf:
+          image:
+            name: linux-geneva-agent/metrics-telegraf
+            tag: "720311"
+        secretBroker:
+          image:
+            name: "secret-broker"
+            tag: "720313"
+            cert: "ssl-aks-default-certificate"
+        mdm:
+          image:
+            name: genevamdm
+            tag: latest
+        mdmstatsd:
+          image:
+            name: genevamdmstatsd
+            tag: latest
+        mdsd:
+          image:
+            name: geneva-mdsd
+            tag: 720310
+        fluentd:
+          image:
+            name: geneva-fluentd
+            tag: 720310
+          confs:
+          - name: fluentd-api.conf
+          - name: fluentd-container-logs.conf
+          - name: fluentd-systemd.conf
+          - name: fluentd.conf
+        azsecpack:
+          image:
+            name: geneva-azsecpack
+            tag: 720310
+
+  keyvault-flexvolume:
+    namespace: kv
+    injectNamespace: true
+    config:
+      flexvol:
+        image:
+          tag: v0.0.13

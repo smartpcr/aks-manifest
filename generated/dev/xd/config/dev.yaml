@@ -1,0 +1,163 @@
+config:
+subcomponents:
+
+  efk-bit:
+    config:
+      global:
+        envName: dev
+        spaceName: xd
+      dns:
+        domain: dev.datacenterhealth.io
+        sslCert: sslcert-datacenterhealth-io
+      efk:
+        elasticsearch:
+          resources:
+            limits:
+              cpu: 1000m
+            requests:
+              cpu: 100m
+          javaOps: "-Xms512m -Xmx512m"
+          data:
+            diskQuota: 50Gi
+        kibana:
+          resources:
+            limits:
+              memory: "1000Mi"
+              cpu: "1000m"
+            requests:
+              cpu: 100m
+
+  fabrikate-prometheus-operator:
+    subcomponents:
+      prometheus-operator:
+        config:
+          alertmanager:
+            ingress:
+              hosts:
+                - "alertmanager-dev-xd.datacenterhealth.io"
+              tls:
+                - secretName: "sslcert-datacenterhealth-io"
+                  hosts:
+                    - "alertmanager-dev-xd.datacenterhealth.io"
+          prometheus:
+            ingress:
+              hosts:
+                - "prometheus-dev-xd.datacenterhealth.io"
+              tls:
+                - secretName: "sslcert-datacenterhealth-io"
+                  hosts:
+                    - "prometheus-dev-xd.datacenterhealth.io"
+          grafana:
+            ingress:
+              hosts:
+                - "grafana-dev-xd.datacenterhealth.io"
+              tls:
+                - secretName: "sslcert-datacenterhealth-io"
+                  hosts:
+                    - "grafana-dev-xd.datacenterhealth.io"
+
+  external-dns:
+    config:
+      acr:
+        name: xddevacr
+      dns:
+        domain: "dev.datacenterhealth.io"
+        sslCert: sslcert-datacenterhealth-io
+        resourceGroup: xiaodong-rg
+      aks:
+        clusterName: xddev-xd-aks
+        location: westus2
+      name: external-dns
+      configSecretName: external-dns-config-file
+      txtOwnerId: xddev-xd-aks-westus2
+      dnsZoneResourceGroup: xiaodong-rg
+      domainFilter: dev.datacenterhealth.io
+
+  nginx:
+    config:
+      acr:
+        name: xddevacr
+      dns:
+        domain: "dev.datacenterhealth.io"
+        sslCert: sslcert-datacenterhealth-io
+        resourceGroup: xiaodong-rg
+      aks:
+        fqdn: xd-f26c6798.hcp.westus2.azmk8s.io
+
+  geneva:
+    config:
+      global:
+        tenantId: "72f988bf-86f1-41af-91ab-2d7cd011db47"
+        subscriptionId: "0ff26203-bd93-4ce9-81a8-90f4e4982da5"
+        envName: "dev"
+      acr:
+        name: "xddevacr"
+      kv:
+        name: "xd-dev-kv"
+      aks:
+        clusterName: "xddev-xd-aks"
+        location: "westus2"
+      geneva:
+        account: smartdctest
+        namespace: CIHDQTest
+        tenant: atlasdataquality
+        environment: DiagnosticsProd
+        role: atlas-dq-dev
+        certName: Geneva-Certificate
+        certThumbprintSecret: Geneva-CertificateThumbprint
+        k8sSecret: geneva-certificate
+        k8sNamespace: default
+        secretCert: gcscert.pem
+        secretKey: gcskey.pem
+        replicas: 2
+        crc32:
+          mdsd: "611a9e03"
+          fluentdApi: "51b8ab9d"
+          fluentdContainerLogs: "18536653"
+          fluentdSystemd: "3657009"
+          fluentd: "37c7a78e"
+        mdsd:
+          monikers:
+            general:
+              name: cihdqtestdiag
+              storageAccount: cihdqtestdiag
+              serviceBus: cihdqtestdiag
+              location: eastus
+            audit:
+              name: cihdqtestaudit
+              storageAccount: cihdqtestaudit
+              serviceBus: cihdqtestaudit
+              location: eastus
+            security:
+              name: cihdqtestsecurity
+              storageAccount: cihdqtestsecurity
+              serviceBus: cihdqtestsecurity
+              location: eastus
+
+  keyvault-controller:
+    subcomponents:
+      kv-controller:
+        config:
+          logLevel: debug
+
+  k8s-certs:
+    config:
+      global:
+        subscriptionId: 0ff26203-bd93-4ce9-81a8-90f4e4982da5
+        tenantId: 72f988bf-86f1-41af-91ab-2d7cd011db47
+        resourceGroup:
+          name: xiaodong-rg
+      kv:
+        name: xd-dev-kv
+        resourceGroup: xiaodong-rg
+        reader: xddev-xd-aks-reader
+        readerClientId: fb167252-9270-49dc-8d91-c5bea9b0b849
+      acr:
+        name: xddevacr
+
+  k8s-secrets:
+    config:
+      kv:
+        name: xd-dev-kv
+      acr:
+        name: xddevacr
